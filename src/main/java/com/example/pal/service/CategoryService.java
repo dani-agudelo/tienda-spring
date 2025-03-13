@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.pal.dto.CategoryDTO;
 import com.example.pal.model.Category;
-import com.example.pal.model.User;
 import com.example.pal.repository.CategoryRepository;
 
 @Service

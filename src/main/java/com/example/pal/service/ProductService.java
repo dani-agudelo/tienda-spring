@@ -20,42 +20,73 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProductService {
 
-  @Autowired private ProductRepository productRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
-  @Autowired private CategoryRepository categoryRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
-  @Autowired private ModelMapper modelMapper;
+    @Autowired
+    private ModelMapper modelMapper;
 
-  public ProductDTO createProduct(CreateProductDTO productDTO) {
-    Product product = new Product();
-    product.setName(productDTO.getName());
-    product.setDescription(productDTO.getDescription());
-    product.setPrice(productDTO.getPrice());
+    /**
+     * Create a new product with categories. If the category does not exist, it will
+     * be created.
+     * If the category already exists, it will be fetched from the database.
+     * 
+     * @param productDTO
+     * @return
+     */
+    public ProductDTO createProductWithCategories(CreateProductDTO productDTO) {
+        Product product = new Product();
+        product.setName(productDTO.getName());
+        product.setDescription(productDTO.getDescription());
+        product.setPrice(productDTO.getPrice());
 
-    Set<Category> categories = new HashSet<>();
-    for (String categoryName : productDTO.getCategories()) {
-      Optional<Category> categoryOpt = categoryRepository.findByName(categoryName);
-      Category category =
-          categoryOpt.orElseGet(
-              () -> {
-                Category newCategory = new Category();
-                newCategory.setName(categoryName);
-                return categoryRepository.save(newCategory);
-              });
-      categories.add(category);
+        Set<Category> categories = new HashSet<>();
+        for (String categoryName : productDTO.getCategories()) {
+            Optional<Category> categoryOpt = categoryRepository.findByName(categoryName);
+            Category category = categoryOpt.orElseGet(
+                    () -> {
+                        Category newCategory = new Category();
+                        newCategory.setName(categoryName);
+                        return categoryRepository.save(newCategory);
+                    });
+            categories.add(category);
+        }
+
+        product.setCategories(categories);
+        Product savedProduct = productRepository.save(product);
+        return modelMapper.map(savedProduct, ProductDTO.class);
     }
 
-    product.setCategories(categories);
-    Product savedProduct = productRepository.save(product);
-    return modelMapper.map(savedProduct, ProductDTO.class);
-  }
+    /**
+     * Quitar categorias a un producto
+     * 
+     * @return
+     */
 
-  // metodo getAllProducts
+    public ProductDTO removeCategories(Long id, List<String> categories) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found!"));
+
+        Set<Category> categoriesToRemove = new HashSet<>();
+        for (String categoryName : categories) {
+            Optional<Category> categoryOpt = categoryRepository.findByName(categoryName);
+            categoryOpt.ifPresent(categoriesToRemove::add);
+        }
+
+        product.getCategories().removeAll(categoriesToRemove);
+        Product updatedProduct = productRepository.save(product);
+        return modelMapper.map(updatedProduct, ProductDTO.class);
+    }
+
+    // metodo getAllProducts
     public List<ProductDTO> getAllProducts() {
         List<Product> products = productRepository.findAll();
         return products.stream()
-            .map(product -> modelMapper.map(product, ProductDTO.class))
-            .collect(Collectors.toList());
+                .map(product -> modelMapper.map(product, ProductDTO.class))
+                .collect(Collectors.toList());
     }
 
     // metodo getProductById
@@ -79,8 +110,7 @@ public class ProductService {
         Set<Category> categories = new HashSet<>();
         for (String categoryName : productDetails.getCategories()) {
             Optional<Category> categoryOpt = categoryRepository.findByName(categoryName);
-            Category category =
-                categoryOpt.orElseGet(
+            Category category = categoryOpt.orElseGet(
                     () -> {
                         Category newCategory = new Category();
                         newCategory.setName(categoryName);
