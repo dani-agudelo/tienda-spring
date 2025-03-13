@@ -22,10 +22,10 @@ public class Product {
   @Column(nullable = false)
   private Double price;
 
-//   @ManyToMany
-//   @JoinTable(
-//       name = "product_categories",
-//       joinColumns = @JoinColumn(name = "product_id"),
-//       inverseJoinColumns = @JoinColumn(name = "category_id"))
-//   private Set<Category> categories;
+  @ManyToMany
+  @JoinTable(
+      name = "product_categories",
+      joinColumns = @JoinColumn(name = "product_id"),
+      inverseJoinColumns = @JoinColumn(name = "category_id"))
+  private Set<Category> categories;
 }

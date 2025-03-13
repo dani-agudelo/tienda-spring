@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-  
+
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
@@ -24,7 +24,9 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(
-            auth -> auth.requestMatchers("/api/users/**").permitAll().anyRequest().authenticated())
+            auth -> auth
+                .requestMatchers("/api/products/**", "/api/categories/**").hasRole("ADMIN")
+                .anyRequest().authenticated())
         .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
     return http.build();
   }
@@ -37,6 +39,12 @@ public class SecurityConfig {
             .password(passwordEncoder.encode("admin123"))
             .roles("ADMIN")
             .build();
-    return new InMemoryUserDetailsManager(admin);
+    UserDetails user =
+        User.builder()
+            .username("user")
+            .password(passwordEncoder.encode("user123"))
+            .roles("USER")
+            .build();
+    return new InMemoryUserDetailsManager(admin, user);
   }
 }

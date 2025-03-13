@@ -1,19 +1,13 @@
 package com.example.pal.model;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+
+import jakarta.persistence.*;
+import java.util.Set;
 import lombok.Data;
 
 @Data
 @Entity
 @Table(name = "categories")
 public class Category {
-    
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -21,8 +15,6 @@ public class Category {
   @Column(nullable = false, unique = true)
   private String name;
 
-//   @ManyToMany(mappedBy = "category", fetch = FetchType.LAZY)
-//   @JsonIgnore
-//   private Set<Product> products;
-    
+  @ManyToMany(mappedBy = "categories")
+  private Set<Product> products;
 }
