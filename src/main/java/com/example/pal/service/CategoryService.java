@@ -11,9 +11,11 @@ import com.example.pal.repository.CategoryRepository;
 @Service
 public class CategoryService {
 
-    @Autowired private CategoryRepository categoryRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
-    @Autowired private ModelMapper modelMapper;
+    @Autowired
+    private ModelMapper modelMapper;
 
     public CategoryDTO createCategory(CategoryDTO categoryDTO) {
         Category category = new Category();
@@ -21,5 +23,5 @@ public class CategoryService {
         Category savedCategory = categoryRepository.save(category);
         return modelMapper.map(savedCategory, CategoryDTO.class);
     }
-    
+
 }
